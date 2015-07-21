@@ -45,13 +45,6 @@ function doAuthenticate(data, configService, callback) {
         url: url,
         crossDomain: true,
         dataType: 'json',
-     //   xhrFields: {
-     //       withCredentials: true
-     //   },
-        //set the credentials
-     //   beforeSend: function (xhr) {
-     //       xhr.setRequestHeader('Authorization', make_base_auth(email, password));
-     //   },
         success: function (responseData, textStatus, jqXHR) {
             console.log("AUTH SUCCESS");
             callback(null, responseData);
@@ -137,6 +130,7 @@ angular.module('myApp.admin', ['ngRoute', 'ngCookies'])
                 userIP = response.ip;
             }
         })
+        $scope.isAdmin = false;
         $scope.isAuthenticated = false;
         $scope.isNotAuthenticated = true;
         var undef;
@@ -147,9 +141,16 @@ angular.module('myApp.admin', ['ngRoute', 'ngCookies'])
         if (truth) {
             $scope.isAuthenticated = true;
             $scope.isNotAuthenticated = false;
+            tok = $cookieStore.get('adminToken');
+            if (tok !== undef && tok === 'T') {
+                $scope.isAdmin = true;
+            } else {
+                $scope.isAdmin = false;
+            }
         } else {
             $scope.isAuthenticated = false;
             $scope.isNotAuthenticated = true;
+            $scope.isAdmin = false;
         }
         ////////////////////////////////////
         // $location.search() allows us to detect query strings.
@@ -175,23 +176,32 @@ angular.module('myApp.admin', ['ngRoute', 'ngCookies'])
             urx = 'auth/';
             query.verb = "Auth";
             query.uIP = userIP;
-        //    query.uEmail = $scope.email;
-        //    query.uPwd = $scope.password;
             var tok = $scope.email + ':' + $scope.password;
             var hash = btoa(tok);
             query.hash = hash;
             data=  JSON.stringify(query);
-        //    doPost(urx, data, function(error, response) {
-            doAuthenticate(data, configService, function(error, response) {
-
-
+            console.log("FOO");
+             doAuthenticate(data, configService, function(error, response) {
+console.log("BAR "+response);
                 if (response !== null) {
                     var tok = response.rToken;
-              //      console.log("TOKEN "+tok);
                     var usx = response.cargo;
+                    console.log(JSON.stringify(usx));
                     //TODO grab some data from usx into cookies for Profile
                     // must then grab those into $scopes in case Profile is selected
-             //       console.log("USR "+JSON.stringify(usx));
+                    //An ADMIN looks like this
+                    //{"uGeoloc":"","uEmail":"TempAdmin@foo.org","uHomepage":"","uName":"defaultadmi
+                    //    n","uFullName":"Default Admin","uRole":"rar","uAvatar":""}
+                    var tmp = usx.uRole;
+                    if (tmp !== null) {
+                        if (tmp.indexOf("rar") > -1) {
+                            $scope.isAdmin = true;
+                            $cookieStore.put('adminToken', 'T');
+                        } else {
+                            $scope.isAdmin = false;
+                            $cookieStore.put('adminToken', 'F');
+                        }
+                    }
                     $cookieStore.put('sToken', tok);
                     $window.location.href = '#/landing';
                     //NOTE: we are forced to refresh the page for the credentials to
@@ -207,6 +217,8 @@ angular.module('myApp.admin', ['ngRoute', 'ngCookies'])
                 $scope.logout = function() {
                    // alert("LOGGING OUT "+$window);
                     $cookieStore.put('sToken', '');
+                     $cookieStore.put('adminToken', "F");
+
                     $window.location.href = '#/landing';
                     return $window.location.reload();
                 };

@@ -38,6 +38,7 @@ config(['$routeProvider', function($routeProvider) {
 }]).
 controller('ApplicationController',  function ($scope, $cookieStore, $window) {
 console.log("AppCtrl");
+
 });
 
 

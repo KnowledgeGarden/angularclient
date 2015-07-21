@@ -6,6 +6,12 @@ angular.module('myApp.user', ['ngRoute'])
 
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/user', {
-            templateUrl: 'components/user/user.html'
+            templateUrl: 'app/components/user/user.html',
+            controller: 'UserCtrl'
         });
-    }]);
+    }])
+    .controller('UserCtrl', ['$scope', '$window', '$location', 'configService','$cookieStore', '$route',
+        function($scope, $window, $location, configService, $cookieStore, $route) {
+            console.log("UserCtrl");
+
+}]);
