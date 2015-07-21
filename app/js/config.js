@@ -17,7 +17,7 @@ var envs = {
         }
     },
     "localhost": {
-        "needsInvite": true,
+        "needsInvite": false,
         "server": {
             "frontend": "http://localhost:8000/app",
             "backend": "http://localhost:8080/",
