@@ -22,7 +22,12 @@ angular.module('Controllerizer',[])
 angular.module('myApp', [
     'ngRoute',
     'ngCookies',
+    //portal configurations
     'Configurizer',
+    //TopicMapProvider: makes REST calls to BacksideServlet
+    'NodeProvider',
+    "RelationProvider",
+    'TopicMapProvider',
     'myApp.about',
     'myApp.landing',
     'myApp.contact',

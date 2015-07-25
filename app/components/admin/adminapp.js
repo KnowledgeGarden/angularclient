@@ -2,6 +2,7 @@
  * Created by Admin on 6/2/2015.
  */
 'use strict';
+
 /**
  * @see http://stackoverflow.com/questions/19343316/angularjs-and-cross-domain-post
  */
@@ -10,6 +11,7 @@
  * @param callback  signature (error, response)
  */
 function doPost(query, data, configService, callback) {
+
     var url = configService.server.backend+query+data;
     //TODO should not be adding data to url
     // but not sure where to find it during request
@@ -121,9 +123,14 @@ angular.module('myApp.admin', ['ngRoute', 'ngCookies'])
     // This system uses one page with shared displays.
     //   That means that we must use conditional display with booleans.
     //   Each verb below must shut off all other diisplays when turning its own on
-    .controller('AdminCtrl', ['$scope', '$window', '$location', 'configService','$cookieStore', '$route',
-                function($scope, $window, $location, configService, $cookieStore, $route) {
+    .controller('AdminCtrl', ['$scope', '$window', '$location', 'configService','$cookieStore', '$route', 'tmprovider',
+        'nodeprovider', 'relationprovider',
+                function($scope, $window, $location, configService, $cookieStore, $route, tmprovider,
+                        nodeprovider, relationprovider) {
+                    tmprovider.init(configService, nodeprovider, relationprovider);
+                    tmprovider.test('Admin');
         var userIP = "";
+
         getIp(function(err, response) {
             if (response !== null) {
                 console.log("IP "+response.ip);
@@ -343,8 +350,10 @@ console.log("BAR "+response);
                     //$scope.$watch('tableParams', function (params) {
          //           $scope.dispList = true;
           //          $scope.testOk = false;
-                    $scope.userList = response.cargo;
-                    console.log("foooo "+JSON.stringify($scope.userList));
+                    $scope.$apply(function () {
+                        $scope.userList = response.cargo;
+                        console.log("foooo "+JSON.stringify($scope.userList));
+                    });
                   //  return $window.location.href = '#/admin';
                   //  return $route.reload();
                     //});
@@ -417,10 +426,12 @@ console.log("BAR "+response);
             query.uEmail = $scope.remail;
             doGet(urx + JSON.stringify(query), configService, function (error, response) {
                 if (response != null) {
-                    console.log("GetUserForRole " + JSON.stringify(response.cargo));
-                    $scope.uRole = response.cargo.uRole;
-                    $scope.huname = response.cargo.uName;
-                    $scope.uEmail = response.cargo.uEmail;
+                    $scope.$apply(function () {
+                        console.log("GetUserForRole " + JSON.stringify(response.cargo));
+                        $scope.uRole = response.cargo.uRole;
+                        $scope.huname = response.cargo.uName;
+                        $scope.uEmail = response.cargo.uEmail;
+                    });
                 }
                 console.log("GUR "+$scope.uRole);
             });

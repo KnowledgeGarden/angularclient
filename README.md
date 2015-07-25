@@ -7,7 +7,7 @@ Right now, it is only coded to the level of user account management.
 This system is designed to run against [BacksideServlet](BacksideServlet "https://github.com/KnowledgeGarden/BacksideServlet"), which must be booted before starting this client. Both this client and that server speak a specific webservices API and protocol. Both projects are co-evolving together<br/><br/>
 Generally speaking, package.json has a start script, which reads:
 
-"start": "http-server -a localhost -p 8080 -c-1",
+"start": "http-server -a localhost -p 8000 -c-1",
 
 To boot the system after:
 **npm update**,
@@ -17,6 +17,8 @@ To boot the system after:
 The start script takes the form:
 "start": "http-server -a  **server** -p **port** -c-1"
 Pay attention to **server** and to **port**.
+
+**Note (20150724)**: System is now using the topic map backside, with the User app starting to display users.
 
 **Note (20150720)**: server.js has been removed; it is not needed so long as the start script is functioning properly. Debugging the start script entails making certain the port is not already in use.
 
