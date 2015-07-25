@@ -1,0 +1,11 @@
+<div ng-controller="UserCtrl">
+    <h1>TopicMap User Index</h1>
+    <section>
+        <table ng-table="userTable" class="table">
+            <tr><th>Name</th></tr>
+            <tr  ng-repeat="usr in userList">
+                <td><a href='/#/user/view/?uname={{usr.uName}}'>+{{usr.fullName}}</a></td>
+            </tr>
+        </table>
+    </section>
+</div>
