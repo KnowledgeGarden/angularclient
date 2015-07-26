@@ -1,0 +1,14 @@
+<section>
+    <h1>HowTo Stash a Web Resource</h1>
+    <ol>
+        <!-- NOTE: URL in javascript must be edited for different installations -->
+        <li>Create a javascript browser bookmark, known as a <i>bookmarklet</i>, with a name such as "TagoStash" and with this javascript code:<br/>
+        <pre>javascript:location.href='http://www.topicquests.org:8000/#/tago/stash?type=s&url='+
+            encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)</pre></li>
+        <li>Log into the website</li>
+        <li>Visit any webpage in the same browser as logged in</li>
+        <li>Click the bookmarklet, which opens a form at the website, complete with the chosen site's title and URL</li>
+        <li>Fill in the Notes form</li>
+        <li>Click Save</li>
+    </ol>
+</section>

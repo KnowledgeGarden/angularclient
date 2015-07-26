@@ -1,0 +1,18 @@
+<div ng-controller="TagoCtrl">
+    <section>
+        <h1>Stashing Form</h1>
+        <div class="form-group">
+            <label>Page Title</label>
+            <span>{{pageTitle}}</span>
+        </div>
+        <div class="form-group">
+            <label>Page URL</label>
+            <span>{{pageURL}}</span>
+        </div>
+        <div class="form-group">
+            <label>Notes</label>
+            <p><textarea ng-model="stashNotes" cols="40" rows="10"></textarea></p>
+        </div>
+        <button ng-click="saveStash()" class="btn btn-success btn-lg">Save</button>
+    </section>
+</div>
