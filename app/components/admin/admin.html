@@ -55,6 +55,9 @@
             <li class="nli" ng-class="{active:tab===3}">
                 <a href ng-click="tab = 3">Manage User</a>
             </li>
+            <li class="nli" ng-class="{active:tab===4}">
+                <a href ng-click="tab = 4">Test</a>
+            </li>
              <br><br>
             <div ng-show="tab === 1">
                 <form>
@@ -108,6 +111,11 @@
 
 
                     </div>
+                </form>
+            </div>
+            <div ng-show="tab === 4">
+                <form>
+                    <button ng-click="testTopic()" class="btn btn-danger btn-lg">Test Topic</button>
                 </form>
             </div>
 

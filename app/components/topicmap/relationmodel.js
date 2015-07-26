@@ -5,14 +5,16 @@
  */
 var RelationModel;
 RelationModel = function() {
-
+    console.log("Hello from RelationModel");
 };
 
-var myModel = null;
+var myRelationModel = null;
 angular.module('RelationProvider',[])
     .service('relationprovider', function() {
-        if (myModel === null) {
-            myModel = new RelationModel();
+        console.log("RelationModelling "+myRelationModel);
+        if (myRelationModel === null) {
+            myRelationModel = new RelationModel();
+            console.log("RelationModelling2 "+myRelationModel);
         }
-        return myModel;
+        return myRelationModel;
     });

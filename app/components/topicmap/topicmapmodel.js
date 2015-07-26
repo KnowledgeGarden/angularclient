@@ -59,6 +59,25 @@ function doGet(query, configService, callback) {
     });
 };
 
+function doAltPost(query, configService, callback) {
+    var url = configService.server.backend+query;
+    console.log("XXX "+url);
+    $.ajax({
+        type: "POST",
+        url: url,
+        crossDomain: true,
+        dataType: "json",
+        success: function(responseData, textStatus, jqXHR) {
+            console.log("DOALTPOST SUCCESS");
+            callback(null, responseData);
+        },
+        error: function (responseData, textStatus, errorThrown) {
+            console.log("DOALTPOST ERROR");
+            callback(responseData, null);
+        }
+    });
+};
+
 ///////////////////////////////
 // TopicMapModel
 ///////////////////////////////
@@ -79,6 +98,8 @@ TopicMapModel = function () {
         if (configService === null) {
             configService = configurizer;
             nodeModel = nodeprovider;
+            var foo = nodeModel.init();
+            console.log("XX "+foo);
             relationModel = relationprovider;
             console.log("TopicMap config " + configService + " " + nodeModel + " " + relationModel);
         }
@@ -94,6 +115,19 @@ TopicMapModel = function () {
 
     self.getRelationModel = function () {
         return relationModel;
+    };
+
+    /**
+     * Create a full query where <code>cargo</code> is involved, by adding
+     * a <em>cargo</em> section to <code>coreQuery</code>
+     * @param coreQuery
+     * @param cargo
+     * @returns {*}
+     */
+    self.buildQuery = function(coreQuery, cargo) {
+        var result = coreQuery;
+        result.cargo = cargo;
+        return result;
     };
 
     self.getCoreQuery = function(verb, userId, userIP) {
@@ -119,7 +153,7 @@ TopicMapModel = function () {
         query.count = '-1';
         doGet(urx + JSON.stringify(query), configService, function (err, response) {
             console.log("ListUsers " + err + " | " + response);
-            if (response != null) {
+            if (null !== response) {
                 var cargo = response.cargo;
                 console.log(JSON.stringify(cargo));
                 result = cargo;
@@ -147,11 +181,43 @@ TopicMapModel = function () {
         });
     };
 
+    self.putTopic = function(jsonTopic, userId, userIP, responseFunction) {
+        var query = self.getCoreQuery("PutTopic", userId, userIP);
+        query = self.buildQuery(query, jsonTopic);
+        //TODO doPost
+    };
+
+    /**
+     *
+     * @param jsonTopic
+     * @param userId
+     * @param userIp
+     * @param responseFunction signature (err, result)
+     */
+    self.submitNewInstanceTopic = function(jsonTopic, userId, userIP, responseFunction) {
+        var query = self.getCoreQuery("NewInstance", userId, userIP);
+        query = self.buildQuery(query, jsonTopic);
+        doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
+            console.log("NEWINSTANCE "+err+" | "+JSON.stringify(response));
+            return responseFunction(err, response);
+        });
+    };
+
+    self.submitNewSubclassTopic = function(jsonTopic, userId, userIP, responseFunction) {
+        var query = self.getCoreQuery("NewSub", userId, userIP);
+        query = self.buildQuery(query, jsonTopic);
+        doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
+            console.log("NEWSUB "+err+" | "+JSON.stringify(response));
+            return responseFunction(err, response);
+        });
+    };
+
 };
 
 var myModel = null;
 angular.module('TopicMapProvider',[])
     .service('tmprovider', function() {
+        console.log("TopicMapModelling");
         if (myModel === null) {
             myModel = new TopicMapModel();
         }

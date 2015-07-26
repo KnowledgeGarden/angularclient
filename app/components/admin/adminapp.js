@@ -472,5 +472,24 @@ console.log("BAR "+response);
                 //TODO watch for errors
             });
         };
+
+        $scope.testTopic = function() {
+            //locator, typeLocator, creatorId, label, details, language,
+            //largeImagePath, smallImagePath, isPrivate
+            var nm = tmprovider.getNodeModel();
+            var topic = nm.newInstanceNode("AngTestClass2", "ClassType", "jackpark", "My test topic",
+                "Created to test the AngularApp code", "en", "/images/cogwheel.png", "/images/cogwheel.sm.png", "F");
+            console.log("TEST1 "+JSON.stringify(topic));
+            //TEST1 {"Locator":"AngTestClass2","uName":"jackpark","Lang":"en","Label":"My test topic",
+            // "Details":"Created to test the AngularApp code","LiP":"/images/cogwheel.png",
+            // "SiP":"/images/cogwheel.sm.png","IsPvt":"F","SType":"ClassType"}
+            tmprovider.submitNewInstanceTopic(topic, "jackpark", userIP, function(err, result) {
+                console.log("HAH "+err+" | "+JSON.stringify(result));
+                //HAH null | {"rMsg":"ok","rToken":"","cargo":{"crDt":"2015-07-25T18:54:17-07:00","trCl":["ClassType"],"crtr":"jackpark",
+                // "lox":"AngTestClass2","sIco":"/images/cogwheel.sm.png","isPrv":"false","_ver":"1437875657385",
+                // "lEdDt":"2015-07-25T18:54:17-07:00","details":["Created to test the AngularApp code"],
+                // "label":["My test topic"],"lIco":"/images/cogwheel.png","inOf":"ClassType"}}
+            });
+        }
     }]);
 
