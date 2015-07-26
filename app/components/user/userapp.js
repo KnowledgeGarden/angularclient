@@ -16,48 +16,20 @@ angular.module('myApp.user', ['ngRoute'])
     .controller('UserCtrl', ['$scope', '$window', '$location', 'configService','$cookieStore', '$route', 'tmprovider',
         '$routeParams',
         function($scope, $window, $location, configService, $cookieStore, $route, tmprovider, $routeParams) {
-            console.log("UserCtrl "+$routeParams.uname);
+            console.log("UserCtrl "+$routeParams.id);
             ////////////////////////
             // Set things up
             ////////////////////////
-            var userIP = "",
-                userId = "",
-                fetchUserName = $routeParams.uname;
-            getIp(function(err, response) {
-                if (response !== null) {
-                    console.log("IP "+response.ip);
-                    userIP = response.ip;
-                }
-            })
-            $scope.isAdmin = false;
-            $scope.isAuthenticated = false;
-            $scope.isNotAuthenticated = true;
-            var undef;
-            var tok = $cookieStore.get('sToken');
-            console.log("A "+(tok == undef));
-            var truth = (tok !== undef && tok !== '');
-            console.log("AC "+tok+" "+truth);
-            if (truth) {
-                $scope.isAuthenticated = true;
-                $scope.isNotAuthenticated = false;
-                tok = $cookieStore.get('adminToken');
-                if (tok !== undef && tok === 'T') {
-                    $scope.isAdmin = true;
-                } else {
-                    $scope.isAdmin = false;
-                }
-            } else {
-                $scope.isAuthenticated = false;
-                $scope.isNotAuthenticated = true;
-                $scope.isAdmin = false;
-            }
+            var undef,
+                fetchUserName = $routeParams.id;
+
             ////////////////////////
             // Now respond
             //   First, see if this was a link to a specific user
             ////////////////////////
             if (fetchUserName !== undef) {
                 console.log("FETCHING USER "+fetchUserName);
-                tmprovider.getTopic(fetchUserName, userId, userIP, function(result) {
+                tmprovider.getTopic(fetchUserName, $scope._userId, $scope._userIP, function(err, result) {
                     console.log("GOT "+JSON.stringify(result));
                     $scope.$apply(function () {
                         $scope.user = result;
@@ -70,7 +42,7 @@ angular.module('myApp.user', ['ngRoute'])
                     //var ul = [];
 
                     console.log("List Users");
-                    tmprovider.listUsers(start, count, userId, userIP, function (result) {
+                    tmprovider.listUsers(start, count, $scope._userId, $scope._userIP, function (err, result) {
                         var theUser,
                             usx = {},
                             ul = [],

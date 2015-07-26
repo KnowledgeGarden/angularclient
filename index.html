@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="app/css/bootstrap.min.css">
   <!--<script src="js/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>-->
 </head>
-<body ng-controller="AdminCtrl">
+<body ng-controller="ApplicationController">
   <div class="container">
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation"> <!--  navbar-inverse  -->
       <div class="navbar-header">
@@ -34,13 +34,16 @@
             <a href class="dropdown-toggle" data-toggle="dropdown">Applications <b class="caret"></b></a>
              <ul class="dropdown-menu">
                 <li ng-if="isAdmin"><a href="#/admin">Admin</a></li>
-                <li><a href="#/user">User</a></li>
+                <li><a href="#/tago">Bookmarks</a></li>
+                <li><a href="#/conversation">Conversations</a></li>
+                <li><a href="#/user">Users</a></li>
             </ul>
           </li>
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+            <li class="dropdown" dropdown on-toggle="toggled(open)">
+                <a href class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
                 <ul class="dropdown-menu">
-
+                    <li><a href="#/help/bm">HowTo Bookmark</a></li>
+                    <li><a href="#/help/stash">HowTo Stash</a></li>
                 </ul>
             </li>
                 <li ng-controller="AdminCtrl" class="dropdown" dropdown on-toggle="toggled(open)">
@@ -80,7 +83,9 @@
   <script src="app/components/landing/landing.js"></script>
   <script src="app/components/admin/adminapp.js"></script>
   <script src="app/components/user/userapp.js"></script>
+  <script src="app/components/tago/tagoapp.js"></script>
+  <script src="app/components/help/helpapp.js"></script>
+  <script src="app/components/conversation/conversationapp.js"></script>
   <script src="app/js/app.js"></script> <!-- the application "myApp" -->
-
 </body>
 </html>

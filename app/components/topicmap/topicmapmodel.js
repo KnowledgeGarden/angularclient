@@ -143,7 +143,8 @@ TopicMapModel = function () {
      * @param count
      * @param userId
      * @param userIP
-     * @param responseFunction signature( a list of users or <code>null</code>
+     * @param responseFunction signature( err, result)
+     * returns a list of JSON objects, or an empty list
      */
     self.listUsers = function (start, count, userId, userIP, responseFunction) {
         var result = [],
@@ -160,10 +161,17 @@ TopicMapModel = function () {
                 //[{"crDt":"2015-07-23T12:48:26-07:00","trCl":["UserType"],"crtr":"SystemUser","lox":"jackpark","sIco":"/images/person_sm.png","isPrv":"false","_ver":"1437680906846",
                 // "lEdDt":"2015-07-23T12:48:26-07:00","details":[""],"label":["Jack Park"],"lIco":"/images/person.png","inOf":"UserType"}]
             }
-            return responseFunction(result);
+            return responseFunction(err, result);
         });
     };
 
+    /**
+     * Return the topic as a JSON object
+     * @param locator
+     * @param userId
+     * @param userIP
+     * @param responseFunction signature (err, rersult)
+     */
     self.getTopic = function(locator, userId, userIP, responseFunction) {
         var result = {},
             query = self.getCoreQuery('GetTopic', userId, userIP);
@@ -177,10 +185,23 @@ TopicMapModel = function () {
                 console.log(JSON.stringify(cargo));
                 result = cargo;
             }
-            return responseFunction(result);
+            return responseFunction(err, result);
         });
     };
 
+    /**
+     * <p>Note:<br/>
+     *  an error message can be returned which reads:<br/>
+     *  <em>OptimisticLockException</em> which means that the database
+     *  has seen a version of the node being stored with a higher
+     *  version number. This typically means that the caller must fetch
+     *  the latest version of the node and perform surgery on that one,
+     *  then use <code>updateTopic</code> to change the version number</p>
+     * @param jsonTopic
+     * @param userId
+     * @param userIP
+     * @param responseFunction signature (err, result)
+     */
     self.putTopic = function(jsonTopic, userId, userIP, responseFunction) {
         var query = self.getCoreQuery("PutTopic", userId, userIP);
         query = self.buildQuery(query, jsonTopic);
@@ -188,24 +209,38 @@ TopicMapModel = function () {
     };
 
     /**
-     *
+     * Update a topic node by updating its <em>version</em> before saving
      * @param jsonTopic
      * @param userId
-     * @param userIp
-     * @param responseFunction signature (err, result)
+     * @param userIP
+     * @param responseFunction signature(err, result)
      */
-    self.submitNewInstanceTopic = function(jsonTopic, userId, userIP, responseFunction) {
+    self.updateTopic = function(jsonTopic, userId, userIP, responseFunction) {
+        var d = new Date();
+        //update the node's version
+        jsonTopic._ver = d.getTime();
+        self.putTopic(jsonTopic, userId, userIp, function(err, result) {
+            return responseFunction(err, result);
+        });
+    };
+    self.submitNewInstanceTopic = function(locator, typeLocator, userId, label, details, language,
+                                           largeImagePath, smallImagePath, isPrivate, userIP, responseFunction) {
+        var topic = nodeModel.newInstanceNode(locator, typeLocator, userId, label, details, language,
+                                                largeImagePath, smallImagePath, isPrivate);
         var query = self.getCoreQuery("NewInstance", userId, userIP);
-        query = self.buildQuery(query, jsonTopic);
+        query = self.buildQuery(query, topic);
         doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
             console.log("NEWINSTANCE "+err+" | "+JSON.stringify(response));
             return responseFunction(err, response);
         });
     };
 
-    self.submitNewSubclassTopic = function(jsonTopic, userId, userIP, responseFunction) {
+    self.submitNewSubclassTopic = function(locator, parentLocator, userId, label, details, language,
+                                           largeImagePath, smallImagePath, isPrivate, userIP, responseFunction) {
+        var topic = nodeModel.newSubclassNode(locator, parentLocator, userId, label, details, language,
+            largeImagePath, smallImagePath, isPrivate);
         var query = self.getCoreQuery("NewSub", userId, userIP);
-        query = self.buildQuery(query, jsonTopic);
+        query = self.buildQuery(query, topic);
         doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
             console.log("NEWSUB "+err+" | "+JSON.stringify(response));
             return responseFunction(err, response);
