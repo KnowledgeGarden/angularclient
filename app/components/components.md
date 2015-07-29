@@ -1,0 +1,2 @@
+# Components #
+Components include both applications, and models. For instance, /topicmap is a directory which contains only models, including a TopicMapProvider for use by other apps which need TopicMap service.
