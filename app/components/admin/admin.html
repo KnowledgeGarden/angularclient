@@ -44,7 +44,7 @@
 
     <p>Number of characters left: <span ng-bind="left()"></span></p> -->
     <h1>Admin Controls</h1>
-    <section>
+    <div class="panel">
         <ul class="nui" ng-init="tab = 1">
             <li class="nli" ng-class="{active:tab===1}">
                 <a href ng-click="tab = 1">List Users</a>
@@ -86,11 +86,15 @@
                 <form>
                     <h2>List Invites</h2>
                     <button ng-click="listInvites()" class="btn btn-success btn-lg">List Invites</button>
-                    <table ng-table="inviteTable" class="table">
-                        <tr><th>Email</th></tr>
-                        <tr ng-repeat="inv in inviteList">
-                            <td>{{inv}}</td>
-                         </tr>
+                    <table ng-table="inviteTable" class="table table-striped">
+                        <thead>
+                            <tr><th>Email</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="inv in inviteList">
+                                <td>{{inv}}</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </form>
             </div>
@@ -120,6 +124,6 @@
             </div>
 
         </ul>
-    </section>
+    </div>
 
 </div>

@@ -32,6 +32,7 @@
     That is based on this assumption:
         <em>Only authenticated users can post any new content</em>
  */
+'use strict';
 var NodeModel;
 NodeModel = function() {
     var self = this;

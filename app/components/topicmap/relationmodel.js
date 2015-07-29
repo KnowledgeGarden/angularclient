@@ -3,6 +3,7 @@
  * RelationModel provides an API for wiring connections (relations)
  * among topics in the topic map.
  */
+'use strict';
 var RelationModel;
 RelationModel = function() {
     console.log("Hello from RelationModel");

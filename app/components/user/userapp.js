@@ -29,7 +29,7 @@ angular.module('myApp.user', ['ngRoute'])
             ////////////////////////
             if (fetchUserName !== undef) {
                 console.log("FETCHING USER "+fetchUserName);
-                tmprovider.getTopic(fetchUserName, $scope._userId, $scope._userIP, function(err, result) {
+                tmprovider.getTopic(fetchUserName, $scope._userId, $scope._userIP, $scope.sToken, function(err, result) {
                     console.log("GOT "+JSON.stringify(result));
                     $scope.$apply(function () {
                         $scope.user = result;
@@ -42,7 +42,7 @@ angular.module('myApp.user', ['ngRoute'])
                     //var ul = [];
 
                     console.log("List Users");
-                    tmprovider.listUsers(start, count, $scope._userId, $scope._userIP, function (err, result) {
+                    tmprovider.listUsers(start, count, $scope._userId, $scope._userIP, $scope.sToken, function (err, result) {
                         var theUser,
                             usx = {},
                             ul = [],

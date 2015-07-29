@@ -5,7 +5,7 @@
  * on every view. It is then available to any app which needs topic map
  * services.
  */
-//TODO: Wire this puppy to do something useful
+'use strict';
 ///////////////////////////////
 // Network support
 ///////////////////////////////
@@ -34,7 +34,7 @@ function doPost(query, data, configService, callback) {
             callback(responseData, null);
         }
     });
-};
+}
 
 /**
  * @param query a query string
@@ -57,7 +57,7 @@ function doGet(query, configService, callback) {
             callback(responseData, null);
         }
     });
-};
+}
 
 function doAltPost(query, configService, callback) {
     var url = configService.server.backend+query;
@@ -76,7 +76,7 @@ function doAltPost(query, configService, callback) {
             callback(responseData, null);
         }
     });
-};
+}
 
 ///////////////////////////////
 // TopicMapModel
@@ -105,10 +105,6 @@ TopicMapModel = function () {
         }
     };
 
-    self.test = function (who) {
-        console.log("Hello from " + who);
-    };
-
     self.getNodeModel = function () {
         return nodeModel;
     };
@@ -130,11 +126,12 @@ TopicMapModel = function () {
         return result;
     };
 
-    self.getCoreQuery = function(verb, userId, userIP) {
+    self.getCoreQuery = function(verb, userId, userIP, sToken) {
         var query = {};
         query.verb = verb;
         query.uIP = userIP;
         query.uName = userId;
+        query.sToken = sToken;
         return query;
     };
     /**
@@ -146,9 +143,9 @@ TopicMapModel = function () {
      * @param responseFunction signature( err, result)
      * returns a list of JSON objects, or an empty list
      */
-    self.listUsers = function (start, count, userId, userIP, responseFunction) {
+    self.listUsers = function (start, count, userId, userIP, sToken, responseFunction) {
         var result = [],
-            query = self.getCoreQuery('ListUsers', userId, userIP);
+            query = self.getCoreQuery('ListUsers', userId, userIP),
             urx = 'tm/';
         query.from = '0';
         query.count = '-1';
@@ -172,9 +169,9 @@ TopicMapModel = function () {
      * @param userIP
      * @param responseFunction signature (err, rersult)
      */
-    self.getTopic = function(locator, userId, userIP, responseFunction) {
+    self.getTopic = function(locator, userId, userIP, sToken, responseFunction) {
         var result = {},
-            query = self.getCoreQuery('GetTopic', userId, userIP);
+            query = self.getCoreQuery('GetTopic', userId, userIP, sToken),
         urx = 'tm/';
         query.Locator = locator;
         query.uIP = userIP;
@@ -202,8 +199,8 @@ TopicMapModel = function () {
      * @param userIP
      * @param responseFunction signature (err, result)
      */
-    self.putTopic = function(jsonTopic, userId, userIP, responseFunction) {
-        var query = self.getCoreQuery("PutTopic", userId, userIP);
+    self.putTopic = function(jsonTopic, userId, userIP, sToken, responseFunction) {
+        var query = self.getCoreQuery("PutTopic", userId, userIP, sToken);
         query = self.buildQuery(query, jsonTopic);
         //TODO doPost
     };
@@ -215,7 +212,7 @@ TopicMapModel = function () {
      * @param userIP
      * @param responseFunction signature(err, result)
      */
-    self.updateTopic = function(jsonTopic, userId, userIP, responseFunction) {
+    self.updateTopic = function(jsonTopic, userId, userIP, sToken, responseFunction) {
         var d = new Date();
         //update the node's version
         jsonTopic._ver = d.getTime();
@@ -224,10 +221,10 @@ TopicMapModel = function () {
         });
     };
     self.submitNewInstanceTopic = function(locator, typeLocator, userId, label, details, language,
-                                           largeImagePath, smallImagePath, isPrivate, userIP, responseFunction) {
+                                           largeImagePath, smallImagePath, isPrivate, userIP, sToken, responseFunction) {
         var topic = nodeModel.newInstanceNode(locator, typeLocator, userId, label, details, language,
                                                 largeImagePath, smallImagePath, isPrivate);
-        var query = self.getCoreQuery("NewInstance", userId, userIP);
+        var query = self.getCoreQuery("NewInstance", userId, userIP, sToken);
         query = self.buildQuery(query, topic);
         doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
             console.log("NEWINSTANCE "+err+" | "+JSON.stringify(response));
@@ -236,10 +233,10 @@ TopicMapModel = function () {
     };
 
     self.submitNewSubclassTopic = function(locator, parentLocator, userId, label, details, language,
-                                           largeImagePath, smallImagePath, isPrivate, userIP, responseFunction) {
+                                           largeImagePath, smallImagePath, isPrivate, userIP, sToken, responseFunction) {
         var topic = nodeModel.newSubclassNode(locator, parentLocator, userId, label, details, language,
             largeImagePath, smallImagePath, isPrivate);
-        var query = self.getCoreQuery("NewSub", userId, userIP);
+        var query = self.getCoreQuery("NewSub", userId, userIP, sToken);
         query = self.buildQuery(query, topic);
         doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
             console.log("NEWSUB "+err+" | "+JSON.stringify(response));

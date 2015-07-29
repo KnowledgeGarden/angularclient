@@ -42,10 +42,12 @@ angular.module('myApp', [
     'NodeProvider',
     "RelationProvider",
     'TopicMapProvider',
+    'TagProvider',
     'myApp.about',
     'myApp.landing',
     'myApp.contact',
     'myApp.tago',
+    'myApp.curation',
     'myApp.conversation',
     'myApp.admin',
     'myApp.user',
@@ -57,6 +59,7 @@ config(['$routeProvider', function($routeProvider) {
 }]).
 controller('ApplicationController',  function ($scope, $cookieStore, $window, tmprovider,
             configService, nodeprovider, relationprovider) {
+    var undef;
     //initialize the topic map
     tmprovider.init(configService, nodeprovider, relationprovider);
     //sort out authentication stuff
@@ -69,16 +72,19 @@ controller('ApplicationController',  function ($scope, $cookieStore, $window, tm
         }
     });
     //set during authentication
-    $scope._userId = $cookieStore.get('uName');
+    var uid = $cookieStore.get('uName');
+    if (undef === uid) {uid = "";}
+    $scope._userId = uid;
     $scope.isAdmin = false;
     $scope.isAuthenticated = false;
     $scope.isNotAuthenticated = true;
-    var undef;
+
     var tok = $cookieStore.get('sToken');
     console.log("A "+(tok == undef));
     var truth = (tok !== undef && tok !== '');
     console.log("AC "+tok+" "+truth);
     if (truth) {
+        $scope.sToken = tok;
         $scope.isAuthenticated = true;
         $scope.isNotAuthenticated = false;
         tok = $cookieStore.get('adminToken');
@@ -88,6 +94,7 @@ controller('ApplicationController',  function ($scope, $cookieStore, $window, tm
             $scope.isAdmin = false;
         }
     } else {
+        $scope.sToken = "guest"; //required default token
         $scope.isAuthenticated = false;
         $scope.isNotAuthenticated = true;
         $scope.isAdmin = false;

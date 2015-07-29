@@ -83,6 +83,15 @@ function doGet(query, configService, callback) {
     });
 };
 
+function getCoreQuery(verb, userId, userIP, sToken) {
+    var query = {};
+    query.verb = verb;
+    query.uIP = userIP;
+    query.uName = userId;
+    query.sToken = sToken;
+    return query;
+};
+
 
 angular.module('myApp.admin', ['ngRoute', 'ngCookies'])
     .config(['$routeProvider', function($routeProvider) {
@@ -124,8 +133,7 @@ angular.module('myApp.admin', ['ngRoute', 'ngCookies'])
         $scope.invitationOnly = configService.needsInvite;
         console.log("ADM "+$scope.invitationOnly+" "+JSON.stringify(hquery));
         $scope.userlocator = "";
-        var query = {},
-            urx="",
+        var urx="",
             data="";
         $scope.message = "";
         $scope.left  = function() {return 100 - $scope.message.length;};
@@ -137,8 +145,7 @@ angular.module('myApp.admin', ['ngRoute', 'ngCookies'])
         //A Verb: Login
         $scope.login = function() {
             urx = 'auth/';
-            query.verb = "Auth";
-            query.uIP = $scope._userIP;
+            var query = getCoreQuery("Auth", $scope._userId, $scope._userIP, $scope.sToken);
             var tok = $scope.email + ':' + $scope.password;
             var hash = btoa(tok);
             query.hash = hash;
@@ -178,14 +185,18 @@ console.log("BAR "+response);
                 }
             });
         };
-                $scope.logout = function() {
-                   // alert("LOGGING OUT "+$window);
-                    $cookieStore.put('sToken', '');
-                     $cookieStore.put('adminToken', "F");
 
-                    $window.location.href = '#/landing';
-                    return $window.location.reload();
-                };
+        $scope.logout = function() {
+           // alert("LOGGING OUT "+$window);
+            $cookieStore.put('sToken', '');
+            $cookieStore.put('adminToken', "F");
+            urx = 'auth/';
+            var query = getCoreQuery("LogOut", $scope._userId, $scope._userIP, $scope.sToken);
+            doGet(urx+JSON.stringify(query), configService, function(err, response) {
+                $window.location.href = '#/landing';
+                return $window.location.reload();
+            });
+        };
 
                 //signup
         $scope.fullname = "";
@@ -208,9 +219,7 @@ console.log("BAR "+response);
         $scope.validate = function() {
             var uname= $scope.vhandle;
             urx='auth/';
-            query.verb="Validate";
-            query.uIP = $scope._userIP;
-            query.uName=uname;
+            var query = getCoreQuery("Validate", uname, $scope._userIP, $scope.sToken);
             doGet(urx+JSON.stringify(query), configService, function(err, response) {
                 //console.log($scope.vhandle+" | "+$scope.handle);
                 //call the page again depending on situation
@@ -227,16 +236,14 @@ console.log("BAR "+response);
         $scope.signup = function() {
             if ($scope.invitationOnly) {
                 urx='admin/';
-                query.verb='ExistsInvite';
-                query.uIP = $scope._userIP;
+                var query = getCoreQuery("ExistsInvite", $scope._userId, $scope._userIP, $scope.sToken);
                 query.uEmail=$scope.email;
                 doGet(urx+JSON.stringify(query), configService, function(err, result) {
                     console.log("INVITE "+err+" "+result);
                     if (result != null) {
                         console.log("INVITE1 "+JSON.stringify(result));
                         urx = 'user/';
-                        query.verb = "NewUser";
-                        query.uIP = $scope._userIP;
+                        var query = getCoreQuery("NewUser", $scope._userId, $scope._userIP, $scope.sToken);
                         query.uEmail = $scope.email;
                         query.uName = $scope.handle;
                         query.uFullName = $scope.fullname;
@@ -264,17 +271,15 @@ console.log("BAR "+response);
             } else {
                 console.log("INVITE3");
                 urx = 'user/';
-                query.verb = "NewUser";
+                var query = getCoreQuery("NewUser", $scope._userId, $scope._userIP, $scope.sToken);
                 query.uIP = $scope._userIP;
                 query.uEmail = $scope.email;
-                query.uName = $scope.handle;
+                query.uName = $scope._userId;
                 query.uFullName = $scope.fullname;
                 query.uAvatar = $scope.avatar;
                 query.uPwd = btoa($scope.password);
                 query.uGeoloc = $scope.Latitude + "|" + $scope.Longitude;
                 query.uHomepage = encodeURI($scope.homepage);
-                //    alert($scope.fullname+" "+$scope.handle+" "+$scope.email+" "+btoa($scope.password));
-
                 data = JSON.stringify(query);
                 doPost(urx, data, configService, function (error, response) {
                     if (response !== null) {
@@ -291,8 +296,7 @@ console.log("BAR "+response);
 
         $scope.listUsers = function() {
             urx = 'admin/';
-            query.verb= "ListUsers";
-            query.uIP = $scope._userIP;
+            var query = getCoreQuery("ListUsers", $scope._userId, $scope._userIP, $scope.sToken);
             query.from= "0";
             query.count= "-1"; // list all of them
             doGet(urx+JSON.stringify(query), configService, function(error, response) {
@@ -324,8 +328,7 @@ console.log("BAR "+response);
         //invitation
         $scope.invite = function() {
             urx = 'admin/';
-            query.verb = "NewInvite";
-            query.uIP = $scope._userIP;
+            var query = getCoreQuery("NewInvite", $scope._userId, $scope._userIP, $scope.sToken);
             query.uEmail = $scope.iemail;
            doPost(urx, JSON.stringify(query), configService, function(err, response) {
                 //TODO watch for errors
@@ -335,8 +338,7 @@ console.log("BAR "+response);
         };
         $scope.removeInvite = function() {
             urx = 'admin/';
-            query.verb = "RemoveInvite";
-            query.uIP = $scope._userIP;
+            var query = getCoreQuery("RemoveInvite", $scope._userId, $scope._userIP, $scope.sToken);
             query.uEmail = $scope.iemail;
             doPost(urx, JSON.stringify(query), configService, function(err, response) {
                 //TODO watch for errors
@@ -347,8 +349,7 @@ console.log("BAR "+response);
 
         $scope.listInvites = function() {
             urx = 'admin/';
-            query.verb= "ListInvites";
-            query.uIP = $scope._userIP;
+            var query = getCoreQuery("ListInvites", $scope._userId, $scope._userIP, $scope.sToken);
             query.from= "0";
             query.count= "-1"; // list all of them
             doGet(urx+JSON.stringify(query), configService, function(error, response) {
@@ -375,11 +376,13 @@ console.log("BAR "+response);
         $scope.uRole = "";
         $scope.huname = "";
         //getUserForRole
+        // This is for the admin adding roles
+        //TODO there is a possible collision among $scope.uRole if we were to
+        // make $scope.uRole a global: maybe $scope._uRole for global?
         $scope.getUserForRole = function() {
             $scope.remail;
             urx = 'user/';
-            query.verb = "GetUser";
-            query.uIP = $scope._userIP;
+            var query = getCoreQuery("GetUser", $scope._userId, $scope._userIP, $scope.sToken);
             query.uEmail = $scope.remail;
             doGet(urx + JSON.stringify(query), configService, function (error, response) {
                 if (response != null) {
@@ -397,9 +400,7 @@ console.log("BAR "+response);
         $scope.updateUserRole = function() {
             console.log("UPDATE "+$scope.huname+" "+$scope.uRole);
             urx = 'admin/';
-            query.verb = "UpdUsRol";
-            query.uIP = $scope._userIP;
-            query.uName = $scope.huname;
+            var query = getCoreQuery("UpdUsRol", $scope.huname, $scope._userIP, $scope.sToken);
             query.uRole = $scope.uRole;
             doPost(urx, JSON.stringify(query), configService, function(err, response) {
                 //TODO watch for errors
@@ -408,9 +409,7 @@ console.log("BAR "+response);
         $scope.changeEmail = function() {
             console.log("UPDATE "+$scope.huname+" "+$scope.uEmail);
             urx = 'admin/';
-            query.verb = "UpdUsEma";
-            query.uIP = $scope._userIP;
-            query.uName = $scope.huname;
+            var query = getCoreQuery("UpdUsEma", $scope.huname, $scope._userIP, $scope.sToken);
             query.uEmail = $scope.uEmail;
             doPost(urx, JSON.stringify(query), configService, function(err, response) {
                 //TODO watch for errors
@@ -420,8 +419,7 @@ console.log("BAR "+response);
             $scope.oldpassword;
             $scope.newpassword;
             urx = 'admin/';
-            query.verb = "UpdUsPwd";
-            query.uIP = $scope._userIP;
+            var query = getCoreQuery("UpdUsPwd", $scope._userId, $scope._userIP, $scope.sToken);
             query.uPwd = $scope.oldpassword;
             query.uNewPwd = $scope.newpassword;
             query.uEmail = $scope.uEmail;
@@ -433,7 +431,10 @@ console.log("BAR "+response);
         $scope.testTopic = function() {
             //locator, typeLocator, creatorId, label, details, language,
             //largeImagePath, smallImagePath, isPrivate
-            var nm = tmprovider.getNodeModel();
+             /** tmprovider.getTopic("StashedResourceNodeType", $scope._userId, $scope._userIP, function (err, result) {
+                console.log("HAH "+JSON.stringify(err)+" | "+JSON.stringify(result));
+            });
+          /**
             var topic = nm.newInstanceNode("AngTestClass3", "ClassType", "jackpark", "My test topic",
                 "Created to test the AngularApp code", "en", "/images/cogwheel.png", "/images/cogwheel.sm.png", "F");
             console.log("TEST1 "+JSON.stringify(topic));
@@ -452,7 +453,7 @@ console.log("BAR "+response);
                 // "crtr":"jackpark","sbOf":["AngTestClass3"],"lox":"AngTestClass4","sIco":"/images/cogwheel.sm.png",
                 // "isPrv":"false","_ver":"1437942131725","lEdDt":"2015-07-26T13:22:11-07:00",
                 // "details":["Created to test the AngularApp code"],"label":["My test topic"],"lIco":"/images/cogwheel.png"}}
-            });
+            }); */
         }
     }]);
 

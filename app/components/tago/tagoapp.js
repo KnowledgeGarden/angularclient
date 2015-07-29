@@ -7,6 +7,41 @@
  * javascript:location.href='http://localhost:8000/#/tago/stash?type=s&url='+
  *   encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)
  */
+'use strict';
+/**
+ * Create a Stashnode
+ * @param title
+ * @param url
+ * @param note
+ * @param userId
+ * @param userIP
+ * @param tmprovider
+ * @param responseFunction signature(err, result) returns the JSON topicNode
+ */
+function newStash(title, url, note, userId, userIP, tmprovider, responseFunction) { //StashedResourceNodeType
+    console.log("NewStash Function");
+    tmprovider.submitNewInstanceTopic(null, StashedResourceNodeType, title, note, "en",
+                   userId, "/images/bookmark.png", "/images/bookmark_sm.png", false, userIP, function(err, result) {
+            return responseFunction(err, result);
+        });
+}
+
+/**
+ * Create a Bookmarknode
+ * @param title
+ * @param url
+ * @param userId
+ * @param userIP
+ * @param tmprovider
+ * @param responseFunction signature(err, result) returns the JSON topic node
+ */
+function newBookmark(title, url, userId, userIP, tmprovider, responseFunction) { //BookmarkNodeType
+    console.log("NewBookmark Function");
+    tmprovider.submitNewInstanceTopic(null, BookmarkNodeType, title, "", "en",
+        userId, "/images/bookmark.png", "/images/bookmark_sm.png", false, userIP, function(err, result) {
+            return responseFunction(err, result);
+        });
+}
 angular.module('myApp.tago', ['ngRoute', 'ngCookies'])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/tago', { //bookmark index
@@ -24,8 +59,9 @@ angular.module('myApp.tago', ['ngRoute', 'ngCookies'])
         });
     }])
     .controller('TagoCtrl', ['$scope', '$window', '$location', 'configService','$cookieStore', '$route',
-            'tmprovider', '$routeParams',
-        function($scope, $window, $location, configService, $cookieStore, $route, tmprovider, $routeParams) {
+            'tmprovider', 'tagprovider', '$routeParams',
+        function($scope, $window, $location, configService, $cookieStore, $route, tmprovider,
+                 tagprovider, $routeParams) {
             ////////////////////////
             // Set things up
             ////////////////////////
@@ -57,10 +93,21 @@ angular.module('myApp.tago', ['ngRoute', 'ngCookies'])
 
             $scope.saveStash = function() {
                 console.log("Stashing "+$scope.stashNotes);
+                newStash($scope.pageTitle, $scope.pageURL, $scope.stashNotes, $scope._userId, $scope._userIP,
+                        tmprovider, function(err, result) {
+                        ///TODO we are done
+                        //redirect
+                    });
             };
 
             $scope.saveBookmark = function() {
                 //TODO
+                newBookmark($scope.pageTitle, $scope.pageURL, $scope._userId, $scope._userIP,
+                    tmprovider, function(err, result) {
+                        //TODO
+                        // deal with tags
+                        // redirect
+                    });
             };
 
             $scope.listBookmarks = function() {
@@ -71,5 +118,8 @@ angular.module('myApp.tago', ['ngRoute', 'ngCookies'])
             $scope.listStashes = function() {
                 console.log("Listing stashes");
                 //TODO
+
             };
+
+
         }]);

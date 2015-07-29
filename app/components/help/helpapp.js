@@ -1,6 +1,7 @@
 /**
  * Created by park on 7/26/2015.
  */
+'use strict';
 angular.module('myApp.help', ['ngRoute', 'ngCookies'])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/help/stash', {
