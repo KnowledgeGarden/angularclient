@@ -59,12 +59,14 @@ angular.module('myApp.tago', ['ngRoute', 'ngCookies'])
         });
     }])
     .controller('TagoCtrl', ['$scope', '$window', '$location', 'configService','$cookieStore', '$route',
-            'tmprovider', 'tagprovider', '$routeParams',
+            'tmprovider', 'tagprovider', 'constantsprovider', '$routeParams',
         function($scope, $window, $location, configService, $cookieStore, $route, tmprovider,
-                 tagprovider, $routeParams) {
+                 tagprovider, constantsprovider, $routeParams) {
             ////////////////////////
             // Set things up
             ////////////////////////
+
+
             var undef, // way to test for 'undefined'
                 url = $routeParams.url,  //bookmark
                 title = $routeParams.title, //bookmark
@@ -83,6 +85,7 @@ angular.module('myApp.tago', ['ngRoute', 'ngCookies'])
                 //TODO
             } else if (undef !== url) {
                 //paint the common content
+                //TODO $digest already in progress
                 $scope.$apply(function () {
                     $scope.pageTitle = title;
                     $scope.pageURL = url;
@@ -90,7 +93,7 @@ angular.module('myApp.tago', ['ngRoute', 'ngCookies'])
             } else {
                 //This is about indexes
             }
-
+            //VERB: stash
             $scope.saveStash = function() {
                 console.log("Stashing "+$scope.stashNotes);
                 newStash($scope.pageTitle, $scope.pageURL, $scope.stashNotes, $scope._userId, $scope._userIP,
@@ -99,20 +102,78 @@ angular.module('myApp.tago', ['ngRoute', 'ngCookies'])
                         //redirect
                     });
             };
-
+            // tags
+            $scope.tag1 = "";
+            $scope.tag2 = "";
+            $scope.tag3 = "";
+            $scope.tag4 = "";
+            //VERB: newBookmark
             $scope.saveBookmark = function() {
-                //TODO
-                newBookmark($scope.pageTitle, $scope.pageURL, $scope._userId, $scope._userIP,
-                    tmprovider, function(err, result) {
-                        //TODO
-                        // deal with tags
-                        // redirect
+                var tglist = [];
+                if ($scope.tag1 !== "") {
+                    tglist.push($scope.tag1);
+                }
+                if ($scope.tag2 !== "") {
+                    tglist.push($scope.tag2);
+                }
+                if ($scope.tag3 !== "") {
+                    tglist.push($scope.tag3);
+                }
+                if ($scope.tag4 !== "") {
+                    tglist.push($scope.tag4);
+                }
+
+                var cargo = tagprovider.newBookmark($scope.pageTitle, $scope._userId);
+                tmprovider._submitNewInstanceTopic(cargo, $scope._userId, $scope._userIP, $scope.sToken, function(err, result) {
+                    var locator = result.lox;
+                    console.log("SaveBkmk "+locator);
+                    var cargo = {};
+                    cargo.lox = locator;
+                    cargo.crtr = $scope._userId;
+                    cargo.url = $scope.pageURL;
+                    if (tglist.length > 0) {
+                        cargo.TagList = tglist;
+                    }
+                    tmprovider.addNodeFeatures(cargo, $scope._userId, $scope._userIP, $scope.sToken, function(err, result) {
+                        return $window.location.href = '#/landing';
                     });
+                });
+
             };
+
+
+            var listInstances = function (nodeType, start, count) {
+                //var ul = [];
+                $scope.bmkList = [];
+                console.log("List Users");
+                tmprovider.listInstanceTopics(nodeType, start, count, $scope._userId, $scope._userIP, $scope.sToken, function (err, result) {
+                    var theBM,
+                        bm = {},
+                        ul = [],
+                        len = result.length;
+                    console.log("LISTINSTANCES " + JSON.stringify(result));
+                    for (var i = 0; i < len; i++) {
+                        theBM = result[i];
+                        bm = {};
+                        bm.ico = constantsprovider.BOOKMARK_SM;
+                        bm.lox = theBM.lox;
+                        bm.label = theBM.label[0];
+                        $scope.bmkList.push(usx);
+                        console.log(JSON.stringify(bm)+" "+JSON.stringify($scope.bmkList));
+                    }
+                    $scope.$apply(function () {
+                        $scope.bmkList = $scope.bmkList;
+                        console.log("FOO " + JSON.stringify($scope.bmkList));
+                    });
+                });
+            };
+
+
 
             $scope.listBookmarks = function() {
                 console.log("Listing bookmarks");
-                //TODO
+                listInstances("BookmarkNodeType", 0, -1);
+                return;
             };
 
             $scope.listStashes = function() {

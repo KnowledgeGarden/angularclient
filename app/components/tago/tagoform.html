@@ -2,15 +2,39 @@
     <div class="panel">
         <h1>Bookmark Form</h1>
         <div class="form-group">
-            <label>Page Title<b class="text-danger">Required for login</b></label>
+            <label>Page Title</label>
             <span>{{pageTitle}}</span>
         </div>
+        <!-- resource information -->
         <div class="form-group">
             <label>Page URL</label>
             <span>{{pageURL}}</span>
         </div>
-
-
+        <!-- tag text entry -->
+        <div class="form-group">
+            <label for="title" class="col-sm-2 control-label">Tag Label</label>
+            <div class="col-sm-4">
+                <input type="text" ng-model="tag1" placeholder="Enter a tag label" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="title" class="col-sm-2 control-label">Tag Label</label>
+            <div class="col-sm-4">
+                <input type="text" ng-model="tag2" placeholder="Enter a tag label" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="title" class="col-sm-2 control-label">Tag Label</label>
+            <div class="col-sm-4">
+                <input type="text" ng-model="tag3" placeholder="Enter a tag label" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="title" class="col-sm-2 control-label">Tag Label</label>
+            <div class="col-sm-4">
+                <input type="text" ng-model="tag4" placeholder="Enter a tag label" class="form-control">
+            </div>
+        </div>
         <button ng-click="saveBookmark()" class="btn btn-success btn-lg">Save</button>
     </div>
 </div>

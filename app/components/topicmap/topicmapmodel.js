@@ -85,6 +85,7 @@ function doAltPost(query, configService, callback) {
 var TopicMapModel;
 TopicMapModel = function () {
     var configService = null,
+        constants = null,
         nodeModel = null,
         relationModel = null,
         self = this;
@@ -94,12 +95,12 @@ TopicMapModel = function () {
     /**
      * Must be called on boot -- by adminapp
      */
-    self.init = function (configurizer, nodeprovider, relationprovider) {
+    self.init = function (configurizer, nodeprovider, relationprovider, constantsprovider) {
         if (configService === null) {
+            constants = constantsprovider;
             configService = configurizer;
             nodeModel = nodeprovider;
-            var foo = nodeModel.init();
-            console.log("XX "+foo);
+            nodeModel.init(constantsprovider);
             relationModel = relationprovider;
             console.log("TopicMap config " + configService + " " + nodeModel + " " + relationModel);
         }
@@ -113,6 +114,9 @@ TopicMapModel = function () {
         return relationModel;
     };
 
+    ////////////////////////////////////////
+    // Query handling
+    ////////////////////////////////////////
     /**
      * Create a full query where <code>cargo</code> is involved, by adding
      * a <em>cargo</em> section to <code>coreQuery</code>
@@ -134,6 +138,28 @@ TopicMapModel = function () {
         query.sToken = sToken;
         return query;
     };
+
+    ////////////////////////////////////////
+    // Topicmap handling
+    ////////////////////////////////////////
+
+    /**
+     * Add features to a given node
+     * @param cargo
+     * @param userId
+     * @param userIp
+     * @param sToken
+     * @param responseFunction
+     */
+    self.addNodeFeatures = function(cargo, userId, userIp, sToken, responseFunction) {
+        var query = self.getCoreQuery(constants.ADD_FEATURES_TO_TOPIC, userId, userIP, sToken);
+        query = self.buildQuery(query, cargo);
+        doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
+            console.log("AddFeatures "+err);
+            return responseFunction(err, response);
+        });
+    };
+
     /**
      * Fetch a list of user topics
      * @param start
@@ -145,10 +171,30 @@ TopicMapModel = function () {
      */
     self.listUsers = function (start, count, userId, userIP, sToken, responseFunction) {
         var result = [],
-            query = self.getCoreQuery('ListUsers', userId, userIP),
+            query = self.getCoreQuery(constants.LIST_USERS, userId, userIP),
             urx = 'tm/';
         query.from = '0';
         query.count = '-1';
+        doGet(urx + JSON.stringify(query), configService, function (err, response) {
+            console.log("ListUsers " + err + " | " + response);
+            if (null !== response) {
+                var cargo = response.cargo;
+                console.log(JSON.stringify(cargo));
+                result = cargo;
+                //[{"crDt":"2015-07-23T12:48:26-07:00","trCl":["UserType"],"crtr":"SystemUser","lox":"jackpark","sIco":"/images/person_sm.png","isPrv":"false","_ver":"1437680906846",
+                // "lEdDt":"2015-07-23T12:48:26-07:00","details":[""],"label":["Jack Park"],"lIco":"/images/person.png","inOf":"UserType"}]
+            }
+            return responseFunction(err, result);
+        });
+    };
+
+    self.listInstanceTopics = function (typeLocator, start, count, userId, userIP, sToken, responseFunction) {
+        var result = [],
+            query = self.getCoreQuery(constants.LIST_INSTANCE_TOPICS, userId, userIP),
+            urx = 'tm/';
+        query.from = '0';
+        query.count = '-1';
+        query.inOf = typeLocator;
         doGet(urx + JSON.stringify(query), configService, function (err, response) {
             console.log("ListUsers " + err + " | " + response);
             if (null !== response) {
@@ -171,7 +217,7 @@ TopicMapModel = function () {
      */
     self.getTopic = function(locator, userId, userIP, sToken, responseFunction) {
         var result = {},
-            query = self.getCoreQuery('GetTopic', userId, userIP, sToken),
+            query = self.getCoreQuery(constants.GET_TOPIC, userId, userIP, sToken),
         urx = 'tm/';
         query.Locator = locator;
         query.uIP = userIP;
@@ -200,7 +246,7 @@ TopicMapModel = function () {
      * @param responseFunction signature (err, result)
      */
     self.putTopic = function(jsonTopic, userId, userIP, sToken, responseFunction) {
-        var query = self.getCoreQuery("PutTopic", userId, userIP, sToken);
+        var query = self.getCoreQuery(constants.PUT_TOPIC, userId, userIP, sToken);
         query = self.buildQuery(query, jsonTopic);
         //TODO doPost
     };
@@ -220,27 +266,42 @@ TopicMapModel = function () {
             return responseFunction(err, result);
         });
     };
-    self.submitNewInstanceTopic = function(locator, typeLocator, userId, label, details, language,
-                                           largeImagePath, smallImagePath, isPrivate, userIP, sToken, responseFunction) {
-        var topic = nodeModel.newInstanceNode(locator, typeLocator, userId, label, details, language,
-                                                largeImagePath, smallImagePath, isPrivate);
-        var query = self.getCoreQuery("NewInstance", userId, userIP, sToken);
+
+    self._submitNewInstanceTopic = function(topic, userId, userIP,  sToken, responseFunction ) {
+        var query = self.getCoreQuery(constants.NEW_INSTANCE_TOPIC, userId, userIP, sToken);
         query = self.buildQuery(query, topic);
         doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
             console.log("NEWINSTANCE "+err+" | "+JSON.stringify(response));
             return responseFunction(err, response);
         });
+
+    }
+    self.submitNewInstanceTopic = function(locator, typeLocator, userId, label, details, language,
+                                           largeImagePath, smallImagePath, isPrivate, userIP, sToken, responseFunction) {
+        var topic = nodeModel.newInstanceNode(locator, typeLocator, userId, label, details, language,
+                                                largeImagePath, smallImagePath, isPrivate);
+        self._submitNewInstanceTopic(topic, userId, userIP, sToken, function(err, response) {
+           return responseFunction(err, response);
+        });
     };
+
+    self._submitNewSubclassTopic = function(topic, userId, userIP, sToken, responseFunction) {
+        var query = self.getCoreQuery(constants.NEW_SUBCLASS_TOPIC, userId, userIP, sToken);
+        query = self.buildQuery(query, topic);
+        doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
+            console.log("NEWSUB "+err+" | "+JSON.stringify(response));
+            return responseFunction(err, response);
+        });
+
+    }
 
     self.submitNewSubclassTopic = function(locator, parentLocator, userId, label, details, language,
                                            largeImagePath, smallImagePath, isPrivate, userIP, sToken, responseFunction) {
         var topic = nodeModel.newSubclassNode(locator, parentLocator, userId, label, details, language,
             largeImagePath, smallImagePath, isPrivate);
-        var query = self.getCoreQuery("NewSub", userId, userIP, sToken);
-        query = self.buildQuery(query, topic);
-        doAltPost("tm/"+JSON.stringify(query), configService, function(err, response) {
-            console.log("NEWSUB "+err+" | "+JSON.stringify(response));
-            return responseFunction(err, response);
+        console.log("TMT "+JSON.stringify(topic));
+        self._submitNewSubclassTopic(topic, userId, userIp, sToken, function(err, response) {
+             return responseFunction(err, response);
         });
     };
 

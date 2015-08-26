@@ -152,7 +152,7 @@ angular.module('myApp.admin', ['ngRoute', 'ngCookies'])
             data=  JSON.stringify(query);
             console.log("FOO");
              doAuthenticate(data, configService, function(error, response) {
-console.log("BAR "+response);
+//console.log("BAR "+response);
                 if (response !== null) {
                     var tok = response.rToken;
                     var usx = response.cargo;
@@ -185,7 +185,7 @@ console.log("BAR "+response);
                 }
             });
         };
-
+        //VERB: logout
         $scope.logout = function() {
            // alert("LOGGING OUT "+$window);
             $cookieStore.put('sToken', '');
@@ -198,23 +198,20 @@ console.log("BAR "+response);
             });
         };
 
-                //signup
         $scope.fullname = "";
         $scope.handle = "";
         //did we send in any info?
 
-            if (hquery.handle !== undef) {
-                $scope.handle = hquery.handle;
-            } //else if (hquery.userlist !== undef) {
-             //   console.log("foooo "+hquery.userlist);
-             //   $scope.userList = JSON.parse(hquery.userlist);
-           // }
+        if (hquery.handle !== undef) {
+            $scope.handle = hquery.handle;
+        }
 
         $scope.avatar = "";
         $scope.homepage = "";
         $scope.Latitude = "";
         $scope.Longitude = "";
-        //validate
+
+        // VERB: validate
         $scope.vhandle = "";
         $scope.validate = function() {
             var uname= $scope.vhandle;
@@ -292,8 +289,8 @@ console.log("BAR "+response);
                 });
             }
         };
-         //list users
 
+        //VERB: list users
         $scope.listUsers = function() {
             urx = 'admin/';
             var query = getCoreQuery("ListUsers", $scope._userId, $scope._userIP, $scope.sToken);
@@ -321,11 +318,13 @@ console.log("BAR "+response);
                 }
             });
         };
-        //user profile
+
+        //BERB: user profile
         $scope.profile = function() {
             alert("profile");
         };
-        //invitation
+
+        // VERB: newinvitation
         $scope.invite = function() {
             urx = 'admin/';
             var query = getCoreQuery("NewInvite", $scope._userId, $scope._userIP, $scope.sToken);
@@ -336,6 +335,8 @@ console.log("BAR "+response);
             });
 
         };
+
+        //VERB: removeinvite
         $scope.removeInvite = function() {
             urx = 'admin/';
             var query = getCoreQuery("RemoveInvite", $scope._userId, $scope._userIP, $scope.sToken);
@@ -347,6 +348,7 @@ console.log("BAR "+response);
 
         };
 
+        //VERB: listinvites
         $scope.listInvites = function() {
             urx = 'admin/';
             var query = getCoreQuery("ListInvites", $scope._userId, $scope._userIP, $scope.sToken);
@@ -375,7 +377,7 @@ console.log("BAR "+response);
         };
         $scope.uRole = "";
         $scope.huname = "";
-        //getUserForRole
+        // VERB: getUserForRole
         // This is for the admin adding roles
         //TODO there is a possible collision among $scope.uRole if we were to
         // make $scope.uRole a global: maybe $scope._uRole for global?
@@ -396,7 +398,7 @@ console.log("BAR "+response);
                 console.log("GUR "+$scope.uRole);
             });
         };
-        //updateRole
+        //VERB: updateRole
         $scope.updateUserRole = function() {
             console.log("UPDATE "+$scope.huname+" "+$scope.uRole);
             urx = 'admin/';
@@ -406,6 +408,7 @@ console.log("BAR "+response);
                 //TODO watch for errors
             });
         };
+        //VERB: change email
         $scope.changeEmail = function() {
             console.log("UPDATE "+$scope.huname+" "+$scope.uEmail);
             urx = 'admin/';
@@ -415,6 +418,7 @@ console.log("BAR "+response);
                 //TODO watch for errors
             });
         };
+        //VERB: change password
         $scope.changePassword = function() {
             $scope.oldpassword;
             $scope.newpassword;
@@ -427,7 +431,7 @@ console.log("BAR "+response);
                 //TODO watch for errors
             });
         };
-
+        //VERB: testtopic -- a Test button on the Admin view for testing stuff
         $scope.testTopic = function() {
             //locator, typeLocator, creatorId, label, details, language,
             //largeImagePath, smallImagePath, isPrivate

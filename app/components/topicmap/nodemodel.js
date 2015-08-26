@@ -35,11 +35,14 @@
 'use strict';
 var NodeModel;
 NodeModel = function() {
-    var self = this;
+    var constants = null,
+        self = this;
 
-    self.init = function() {
+    self.init = function(constantsprovider) {
         console.log("NodeModel.init");
-        return "Howdy";
+        if (constants !== null) {
+            constants = constantsprovider;
+        }
     };
 
     console.log("Hello from NodeModel "+self);
@@ -59,31 +62,34 @@ NodeModel = function() {
                             largeImagePath, smallImagePath, isPrivate) {
         var result = {};
         if (locator !== null) {
-            result.Locator = locator;
+            result.lox = locator;
         }
-        result.uName = creatorId;
+        console.log(locator+" | "+JSON.stringify(result));
+        result.crtr = creatorId;
         if (null !== language) {
             result.Lang = language;
         } else {
             result.Lang = "en";
         }
         if (null !== label) {
-            result.Label = label;
+            result.label = label;
         }
+        console.log(locator+" | "+JSON.stringify(result));
         if (null != details) {
-            result.Details = details;
+            result.details = details;
         }
         if (null !== largeImagePath) {
-            result.LiP = largeImagePath;
+            result.lIco = largeImagePath;
         } else {
-            result.LiP = "";
+            result.lIco = "";
         }
+        console.log(locator+" | "+JSON.stringify(result));
         if (null !== smallImagePath) {
-            result.SiP = smallImagePath;
+            result.sIco = smallImagePath;
         } else {
-            result.SiP = "";
+            result.sIco = "";
         }
-        result.IsPvt = isPrivate;
+        result.isPrv = isPrivate;
         return result;
     };
 
@@ -103,7 +109,8 @@ NodeModel = function() {
                                     largeImagePath, smallImagePath, isPrivate) {
         var result = self.newNode(locator, creatorId, label, details, language,
             largeImagePath, smallImagePath, isPrivate);
-        result.SType = typeLocator;
+        result.inOf = typeLocator;
+        console.log("NEWINST "+JSON.stringify(result));
         return result;
     };
 
@@ -111,7 +118,7 @@ NodeModel = function() {
                                     largeImagePath, smallImagePath, isPrivate) {
         var result = self.newNode(locator, creatorId, label, details, language,
             largeImagePath, smallImagePath, isPrivate);
-        result.PType = parentLocator;
+        result.sbOf = parentLocator;
         return result;
     };
 

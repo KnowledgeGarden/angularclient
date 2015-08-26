@@ -3,6 +3,15 @@
         <H1>Bookmark Index</H1>
         <button ng-click="listBookmarks()" class="btn btn-success btn-lg">List Bookmarks</button>
         <button ng-click="listStashes()" class="btn btn-success btn-lg">List Stashed Resources</button>
-        <!-- TODO -->
+        <table ng-table="bookmarkTable" class="table table-striped">
+            <thead>
+            <tr><th>Name</th></tr>
+            </thead>
+            <tbody>
+            <tr  ng-repeat="bmk in bmkList">
+                <td><img src='bkmk.ico'> <a href='/#/tago/view/?id={{bkmk.lox}}'>+{{bkmk.title}}</a></td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </div>
